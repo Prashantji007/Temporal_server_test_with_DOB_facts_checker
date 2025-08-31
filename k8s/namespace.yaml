@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dob-facts-app
+  labels:
+    name: dob-facts-app

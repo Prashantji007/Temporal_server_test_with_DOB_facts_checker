@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dob-facts-config
+  namespace: dob-facts-app
+data:
+  BACKEND_URL: "http://dob-facts-backend-service:8000"
+  FRONTEND_URL: "http://dob-facts-frontend-service:3000"
+  LOG_LEVEL: "INFO"
