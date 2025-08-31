@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: temporal-schema-setup
+  namespace: temporal
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: schema-setup
+        image: temporalio/admin-tools:1.23.0
+        command: ["bash", "-c"]
+        args:
+          - |
+            temporal-sql-tool \
+              --db postgres \
+              --plugin postgres \
+              --db-username temporal \
+              --db-password temporal \
+              --db-host postgres.temporal.svc.cluster.local \
+              --db-port 5432 \
+              create-database && \
+            temporal-sql-tool \
+              --db postgres \
+              --plugin postgres \
+              --db-username temporal \
+              --db-password temporal \
+              --db-host postgres.temporal.svc.cluster.local \
+              --db-port 5432 \
+              setup-schema -v 0.0 && \
+            temporal-sql-tool \
+              --db postgres \
+              --plugin postgres \
+              --db-username temporal \
+              --db-password temporal \
+              --db-host postgres.temporal.svc.cluster.local \
+              --db-port 5432 \
+              update-schema -d schema/postgresql/v96/temporal/versioned

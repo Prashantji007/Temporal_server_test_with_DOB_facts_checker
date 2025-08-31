@@ -1,0 +1,326 @@
+# ----------------------------------
+# Temporal Frontend
+# ----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-frontend
+  namespace: temporal
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: temporal-frontend
+  template:
+    metadata:
+      labels:
+        app: temporal-frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - temporal-frontend
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: temporal-frontend
+        image: temporalio/auto-setup:1.23.0
+        imagePullPolicy: IfNotPresent
+        args: ["start", "--service", "frontend"]
+        env:
+        - name: DB
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_HOST
+          value: "postgres"
+        - name: POSTGRES_USER
+          value: "temporal"
+        - name: POSTGRES_PWD
+          value: "temporal"
+        ports:
+        - containerPort: 7233
+        readinessProbe:
+          tcpSocket:
+            port: 7233
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 7233
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: temporal-frontend
+  namespace: temporal
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7233
+      targetPort: 7233
+  selector:
+    app: temporal-frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdb-temporal-frontend
+  namespace: temporal
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: temporal-frontend
+---
+# ----------------------------------
+# Temporal History
+# ----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-history
+  namespace: temporal
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: temporal-history
+  template:
+    metadata:
+      labels:
+        app: temporal-history
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - temporal-history
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: temporal-history
+        image: temporalio/auto-setup:1.23.0
+        imagePullPolicy: IfNotPresent
+        args: ["start", "--service", "history"]
+        env:
+        - name: DB
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_HOST
+          value: "postgres.temporal.svc.cluster.local"
+        - name: POSTGRES_USER
+          value: "temporal"
+        - name: POSTGRES_PWD
+          value: "temporal"
+        ports:
+        - containerPort: 7234
+        readinessProbe:
+          tcpSocket:
+            port: 7234
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 7234
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdb-temporal-history
+  namespace: temporal
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: temporal-history
+---
+# ----------------------------------
+# Temporal Matching
+# ----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-matching
+  namespace: temporal
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: temporal-matching
+  template:
+    metadata:
+      labels:
+        app: temporal-matching
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - temporal-matching
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: temporal-matching
+        image: temporalio/auto-setup:1.23.0
+        imagePullPolicy: IfNotPresent
+        args: ["start", "--service", "matching"]
+        env:
+        - name: DB
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_HOST
+          value: "postgres.temporal.svc.cluster.local"
+        - name: POSTGRES_USER
+          value: "temporal"
+        - name: POSTGRES_PWD
+          value: "temporal"
+        ports:
+        - containerPort: 7235
+        readinessProbe:
+          tcpSocket:
+            port: 7235
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 7235
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdb-temporal-matching
+  namespace: temporal
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: temporal-matching
+---
+# ----------------------------------
+# Temporal Worker
+# ----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-worker
+  namespace: temporal
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: temporal-worker
+  template:
+    metadata:
+      labels:
+        app: temporal-worker
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - temporal-worker
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: temporal-worker
+        image: temporalio/auto-setup:1.23.0
+        imagePullPolicy: IfNotPresent
+        args: ["start", "--service", "worker"]
+        env:
+        - name: DB
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_HOST
+          value: "postgres.temporal.svc.cluster.local"
+        - name: POSTGRES_USER
+          value: "temporal"
+        - name: POSTGRES_PWD
+          value: "temporal"
+        ports:
+        - containerPort: 7236
+        readinessProbe:
+          tcpSocket:
+            port: 7236
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 7236
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdb-temporal-worker
+  namespace: temporal
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: temporal-worker
+---
+# ----------------------------------
+# Temporal Web UI
+# ----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-web
+  namespace: temporal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-web
+  template:
+    metadata:
+      labels:
+        app: temporal-web
+    spec:
+      containers:
+      - name: temporal-web
+        image: temporalio/web:2.23.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: TEMPORAL_GRPC_ENDPOINT
+          value: temporal-frontend:7233
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: temporal-web
+  namespace: temporal
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: temporal-web
