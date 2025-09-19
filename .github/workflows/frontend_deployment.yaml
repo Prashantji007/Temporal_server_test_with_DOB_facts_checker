@@ -28,7 +28,7 @@ jobs:
         echo "Building image $IMAGENAME:$TAG"
         docker build -t $IMAGENAME:$TAG -f Dockerfile.frontend .
 
-        echo "Pushing image $IMAGE:$TAG"
+        echo "Pushing image $IMAGENAME:$TAG"
         docker push $IMAGENAME:$TAG
 
           echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
