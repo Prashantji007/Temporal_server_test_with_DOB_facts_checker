@@ -2,6 +2,10 @@ name: Frontend Deployment
 
 on: workflow_dispatch
 
+permissions:              
+  id-token: write          # required for OIDC federation
+  contents: read   
+  
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
