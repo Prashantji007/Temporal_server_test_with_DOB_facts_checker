@@ -6,7 +6,7 @@ metadata:
   labels:
     app: dob-facts-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: dob-facts-frontend
@@ -43,6 +43,8 @@ spec:
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 5
+      imagePullSecrets:
+      - name: acr-cred
 ---
 apiVersion: v1
 kind: Service
