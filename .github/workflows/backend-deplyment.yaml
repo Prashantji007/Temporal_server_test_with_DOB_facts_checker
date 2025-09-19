@@ -1,0 +1,72 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches:
+    - main
+    
+permissions:              
+  id-token: write          # required for OIDC federation
+  contents: read   
+
+env:
+  ACRNAME: acrtodoappdev01
+  IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_be
+  TAG: ${{ github.run_number }} # you can also use ${{ github.sha }} for commit hash or 'latest'
+  
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses:  actions/checkout@v4
+
+        # Login to ACR
+    - name: ACR Login
+      run: docker login acrtodoappdev01.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
+
+    # Build and Push Docker Image
+    - name: Build and Push
+      run: |
+        echo "Building image $IMAGENAME:$TAG"
+        docker build -t $IMAGENAME:$TAG -f Dockerfile.backend .
+
+        echo "Pushing image $IMAGENAME:$TAG"
+        docker push $IMAGENAME:$TAG
+
+          echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
+
+
+    - name: Update manifest with image details
+      run: |
+        # Replace placeholders in manifest
+        sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/backend-deployment.yaml
+        sed -i "s|#__#IMAGE_TAG#__#|$IMAGE_TAG|g" k8s/backend-deployment.yaml
+
+        echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
+
+    
+
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest'
+
+
+    - name: Azure Login
+      uses: Azure/login@v2.3.0
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+
+    - name: Set AKS context
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: rg-todoapp-dev
+        cluster-name: aks-todoapp-dev01
+
+    - name: Deploy Frontend to Kubernetes
+      run: |
+       kubectl apply -f k8s/backend-deployment.yaml
+       kubectl apply -f k8s/ingress.yaml
