@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 jobs:
   deploy-frontend:
-    runs-on: raja:rana
+    runs-on: self-hosted
     steps:
     - name: Checkout repository
       uses:  actions/checkout@v4
