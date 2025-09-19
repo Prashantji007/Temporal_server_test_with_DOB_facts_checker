@@ -5,6 +5,11 @@ on: workflow_dispatch
 permissions:              
   id-token: write          # required for OIDC federation
   contents: read   
+
+env:
+  ACRNAME: acrtodoappdev01
+  IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_ui
+  TAG: ${{ github.run_number }} # you can also use ${{ github.sha }} for commit hash or 'latest'
   
 jobs:
   deploy-frontend:
@@ -20,18 +25,26 @@ jobs:
     # Build and Push Docker Image
     - name: Build and Push
       run: |
-        ACRNAME=acrtodoappdev01
-        IMAGENAME=dob_facts_ui
-        IMAGE=$ACRNAME.azurecr.io/dob_facts
-        TAG=${{ github.run_number }}   # you can also use ${{ github.sha }} for commit hash or 'latest'
-
-        echo "Building image $IMAGE:$TAG"
-        docker build -t $IMAGE/$IMAGENAME:$TAG -f Dockerfile.frontend .
+        echo "Building image $IMAGENAME:$TAG"
+        docker build -t $IMAGENAME:$TAG -f Dockerfile.frontend .
 
         echo "Pushing image $IMAGE:$TAG"
-        docker push $IMAGE/$IMAGENAME:$TAG
+        docker push $IMAGENAME:$TAG
 
-          echo "Pushed image $IMAGE:$TAG to $ACRNAME"
+          echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
+
+
+    - name: Update manifest with image details
+      run: |
+        IMAGE_NAME=acrtodoappdev01.azurecr.io/dob_facts
+        IMAGE_TAG=${{ github.run_number }}
+
+        # Replace placeholders in manifest
+        sed -i "s|#__#IMAGE_NAME#__#|$IMAGE_NAME|g" k8s/frontend-deployment.yaml
+        sed -i "s|#__#IMAGE_TAG#__#|$IMAGE_TAG|g" k8s/frontend-deployment.yaml
+
+        echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
+
     
 
     - name: Set up Kubernetes
