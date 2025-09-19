@@ -17,7 +17,7 @@ jobs:
     - name: Build and Push
       run: |
         ACRNAME=acrtodoappdev01
-        IMAGE=$ACRNAME.azurecr.io/DOB_Facts
+        IMAGE=$ACRNAME.azurecr.io/dob_facts
         TAG=${{ github.run_number }}   # you can also use ${{ github.sha }} for commit hash or 'latest'
 
         echo "Building image $IMAGE:$TAG"
