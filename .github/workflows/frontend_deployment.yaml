@@ -54,8 +54,7 @@ jobs:
 
     - name: Deploy Frontend to Kubernetes
       run: |
+       kubectl apply -f k8s/namespace.yaml
         kubectl apply -f k8s/configmap.yaml
         kubectl apply -f k8s/frontend-deployment.yaml
          kubectl apply -f k8s/ingress.yaml
-      env:
-        KUBECONFIG: ${{ secrets.AKS_KUBECONFIG }}
