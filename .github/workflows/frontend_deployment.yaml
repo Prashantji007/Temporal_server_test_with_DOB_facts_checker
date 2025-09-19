@@ -1,0 +1,23 @@
+name: Frontend Deployment
+
+on: workflow_dispatch
+
+jobs:
+  deploy-frontend:
+    runs-on: raja:rana
+    steps:
+    - name: Checkout repository
+      uses:  actions/checkout@v4
+
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest'
+
+    - name: Deploy Frontend to Kubernetes
+      run: |
+        kubectl apply -f k8s/configmap.yaml
+        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}

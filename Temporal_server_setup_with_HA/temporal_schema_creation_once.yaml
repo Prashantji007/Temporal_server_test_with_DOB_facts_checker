@@ -14,26 +14,26 @@ spec:
         args:
           - |
             temporal-sql-tool \
-              --db postgres \
+              --endpoint postgres.temporal.svc.cluster.local \
+              --port 5432 \
+              --user temporal \
+              --password temporal \
+              --database temporal \
               --plugin postgres \
-              --db-username temporal \
-              --db-password temporal \
-              --db-host postgres.temporal.svc.cluster.local \
-              --db-port 5432 \
               create-database && \
             temporal-sql-tool \
-              --db postgres \
+              --endpoint postgres.temporal.svc.cluster.local \
+              --port 5432 \
+              --user temporal \
+              --password temporal \
+              --database temporal \
               --plugin postgres \
-              --db-username temporal \
-              --db-password temporal \
-              --db-host postgres.temporal.svc.cluster.local \
-              --db-port 5432 \
               setup-schema -v 0.0 && \
             temporal-sql-tool \
-              --db postgres \
+              --endpoint postgres.temporal.svc.cluster.local \
+              --port 5432 \
+              --user temporal \
+              --password temporal \
+              --database temporal \
               --plugin postgres \
-              --db-username temporal \
-              --db-password temporal \
-              --db-host postgres.temporal.svc.cluster.local \
-              --db-port 5432 \
               update-schema -d schema/postgresql/v96/temporal/versioned

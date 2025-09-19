@@ -26,9 +26,31 @@ spec:
                 values:
                 - temporal-frontend
             topologyKey: "kubernetes.io/hostname"
+      volumes:
+      - name: config-src
+        configMap:
+          name: temporal-config
+      - name: config-dir
+        emptyDir: {}
+      initContainers:
+      - name: copy-config
+        image: busybox
+        securityContext:
+          runAsUser: 0
+        command:
+          - sh
+          - -c
+          - >
+            cp /config-src/* /etc/temporal/config/ &&
+            chmod -R 777 /etc/temporal/config
+        volumeMounts:
+        - name: config-src
+          mountPath: /config-src
+        - name: config-dir
+          mountPath: /etc/temporal/config
       containers:
       - name: temporal-frontend
-        image: temporalio/auto-setup:1.23.0
+        image: temporalio/auto-setup:latest
         imagePullPolicy: IfNotPresent
         args: ["start", "--service", "frontend"]
         env:
@@ -37,7 +59,7 @@ spec:
         - name: DB_PORT
           value: "5432"
         - name: DB_HOST
-          value: "postgres"
+          value: "postgres.temporal.svc.cluster.local"
         - name: POSTGRES_USER
           value: "temporal"
         - name: POSTGRES_PWD
@@ -54,6 +76,9 @@ spec:
             port: 7233
           initialDelaySeconds: 20
           periodSeconds: 10
+        volumeMounts:
+        - name: config-dir
+          mountPath: /etc/temporal/config
 ---
 apiVersion: v1
 kind: Service
@@ -78,7 +103,7 @@ spec:
   selector:
     matchLabels:
       app: temporal-frontend
----
+
 # ----------------------------------
 # Temporal History
 # ----------------------------------
@@ -107,9 +132,31 @@ spec:
                 values:
                 - temporal-history
             topologyKey: "kubernetes.io/hostname"
+      volumes:
+      - name: config-src
+        configMap:
+          name: temporal-config
+      - name: config-dir
+        emptyDir: {}
+      initContainers:
+      - name: copy-config
+        image: busybox
+        securityContext:
+          runAsUser: 0
+        command:
+          - sh
+          - -c
+          - >
+            cp /config-src/* /etc/temporal/config/ &&
+            chmod -R 777 /etc/temporal/config
+        volumeMounts:
+        - name: config-src
+          mountPath: /config-src
+        - name: config-dir
+          mountPath: /etc/temporal/config
       containers:
       - name: temporal-history
-        image: temporalio/auto-setup:1.23.0
+        image: temporalio/auto-setup:latest
         imagePullPolicy: IfNotPresent
         args: ["start", "--service", "history"]
         env:
@@ -135,6 +182,9 @@ spec:
             port: 7234
           initialDelaySeconds: 20
           periodSeconds: 10
+        volumeMounts:
+        - name: config-dir
+          mountPath: /etc/temporal/config
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -146,7 +196,7 @@ spec:
   selector:
     matchLabels:
       app: temporal-history
----
+
 # ----------------------------------
 # Temporal Matching
 # ----------------------------------
@@ -175,9 +225,31 @@ spec:
                 values:
                 - temporal-matching
             topologyKey: "kubernetes.io/hostname"
+      volumes:
+      - name: config-src
+        configMap:
+          name: temporal-config
+      - name: config-dir
+        emptyDir: {}
+      initContainers:
+      - name: copy-config
+        image: busybox
+        securityContext:
+          runAsUser: 0
+        command:
+          - sh
+          - -c
+          - >
+            cp /config-src/* /etc/temporal/config/ &&
+            chmod -R 777 /etc/temporal/config
+        volumeMounts:
+        - name: config-src
+          mountPath: /config-src
+        - name: config-dir
+          mountPath: /etc/temporal/config
       containers:
       - name: temporal-matching
-        image: temporalio/auto-setup:1.23.0
+        image: temporalio/auto-setup:latest
         imagePullPolicy: IfNotPresent
         args: ["start", "--service", "matching"]
         env:
@@ -203,6 +275,9 @@ spec:
             port: 7235
           initialDelaySeconds: 20
           periodSeconds: 10
+        volumeMounts:
+        - name: config-dir
+          mountPath: /etc/temporal/config
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -214,7 +289,7 @@ spec:
   selector:
     matchLabels:
       app: temporal-matching
----
+
 # ----------------------------------
 # Temporal Worker
 # ----------------------------------
@@ -243,9 +318,31 @@ spec:
                 values:
                 - temporal-worker
             topologyKey: "kubernetes.io/hostname"
+      volumes:
+      - name: config-src
+        configMap:
+          name: temporal-config
+      - name: config-dir
+        emptyDir: {}
+      initContainers:
+      - name: copy-config
+        image: busybox
+        securityContext:
+          runAsUser: 0
+        command:
+          - sh
+          - -c
+          - >
+            cp /config-src/* /etc/temporal/config/ &&
+            chmod -R 777 /etc/temporal/config
+        volumeMounts:
+        - name: config-src
+          mountPath: /config-src
+        - name: config-dir
+          mountPath: /etc/temporal/config
       containers:
       - name: temporal-worker
-        image: temporalio/auto-setup:1.23.0
+        image: temporalio/auto-setup:latest
         imagePullPolicy: IfNotPresent
         args: ["start", "--service", "worker"]
         env:
@@ -271,6 +368,9 @@ spec:
             port: 7236
           initialDelaySeconds: 20
           periodSeconds: 10
+        volumeMounts:
+        - name: config-dir
+          mountPath: /etc/temporal/config
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -282,7 +382,7 @@ spec:
   selector:
     matchLabels:
       app: temporal-worker
----
+
 # ----------------------------------
 # Temporal Web UI
 # ----------------------------------
@@ -303,10 +403,10 @@ spec:
     spec:
       containers:
       - name: temporal-web
-        image: temporalio/web:2.23.2
+        image: temporalio/web:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8080
+        - containerPort: 8088
         env:
         - name: TEMPORAL_GRPC_ENDPOINT
           value: temporal-frontend:7233
@@ -319,8 +419,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30080
+    - port: 8088
+      targetPort: 8088
+      nodePort: 30088
   selector:
     app: temporal-web
