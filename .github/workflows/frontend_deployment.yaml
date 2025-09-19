@@ -21,7 +21,7 @@ jobs:
         TAG=${{ github.run_number }}   # you can also use ${{ github.sha }} for commit hash or 'latest'
 
         echo "Building image $IMAGE:$TAG"
-        docker build -t $IMAGE:$TAG ./Dockerfile.frontend
+        docker build -t $IMAGE:$TAG ../Dockerfile.frontend
 
         echo "Pushing image $IMAGE:$TAG"
         docker push $IMAGE:$TAG
