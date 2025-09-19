@@ -9,15 +9,42 @@ jobs:
     - name: Checkout repository
       uses:  actions/checkout@v4
 
+        # Login to ACR
+    - name: ACR Login
+      run: docker login acrtodoappdev01.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
+
+    # Build and Push Docker Image
+    - name: Build and Push
+      run: |
+        ACRNAME=acrtodoappdev01
+        IMAGE=$ACRNAME.azurecr.io/DOB_Facts
+        TAG=${{ github.run_number }}   # you can also use ${{ github.sha }} for commit hash or 'latest'
+
+        echo "Building image $IMAGE:$TAG"
+        docker build -t $IMAGE:$TAG ./Dockerfile.frontend
+
+        echo "Pushing image $IMAGE:$TAG"
+        docker push $IMAGE:$TAG
+
+          echo "Pushed image $IMAGE:$TAG to $ACRNAME"
+    
+
     - name: Set up Kubernetes
       uses: azure/setup-kubectl@v1
       with:
         version: 'latest'
 
+    - name: Kubernetes Set Context
+      uses: Azure/k8s-set-context@v3.0
+      with:
+        method: kubeconfig
+        kubeconfig: ${{ secrets.AKS_KUBECONFIG }}
+      
+
     - name: Deploy Frontend to Kubernetes
       run: |
         kubectl apply -f k8s/configmap.yaml
-        kubectl apply -f k8s/backend-deployment.yaml
         kubectl apply -f k8s/frontend-deployment.yaml
+         kubectl apply -f k8s/ingress.yaml
       env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        KUBECONFIG: ${{ secrets.AKS_KUBECONFIG }}
