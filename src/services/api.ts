@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://dob-facts-backend-service:8000';
 
 export interface StartAnalysisResponse {
   workflow_id: string;
