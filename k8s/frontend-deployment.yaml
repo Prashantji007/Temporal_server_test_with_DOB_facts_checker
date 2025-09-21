@@ -20,7 +20,7 @@ spec:
         image: #__#IMAGE_NAME#__#:#__#IMAGE_TAG#__#
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 3000
+        - containerPort: 80
         resources:
           requests:
             memory: "64Mi"
@@ -59,10 +59,8 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 3000
+    targetPort: 80
   type: LoadBalancer
-
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -88,5 +86,4 @@ spec:
           service:
             name: dob-facts-frontend-service
             port:
-              number: 3000
-
+              number: 80
