@@ -67,7 +67,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: dob-facts-ingress
+  name: dob-facts-ingress-fe
   namespace: dob-facts-app
   annotations:
     # 👉 CORS config (adjust if needed)
