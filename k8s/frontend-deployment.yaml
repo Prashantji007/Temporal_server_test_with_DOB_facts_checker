@@ -58,7 +58,7 @@ spec:
     app: dob-facts-frontend
   ports:
   - protocol: TCP
-    port: 3000
+    port: 80
     targetPort: 3000
   type: ClusterIP
 ---
@@ -86,4 +86,4 @@ spec:
           service:
             name: dob-facts-frontend-service
             port:
-              number: 3000
+              number: 80
