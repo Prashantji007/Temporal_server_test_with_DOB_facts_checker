@@ -1,24 +1,17 @@
-# Development-focused Frontend Dockerfile
-FROM node:18-alpine
-
+# Stage 1: Build
+FROM node:18-alpine AS build
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
-
-# Install all dependencies (including dev dependencies for development)
-RUN npm install
-
-# Copy source code
+RUN npm ci
 COPY . .
-
-# Build the application
 RUN npm run build
-    
-# Use simple serve to host the built files
-RUN npm install -g serve
 
-EXPOSE 3000
+# Stage 2: NGINX
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Serve the built application
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Copy custom nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
