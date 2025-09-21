@@ -60,4 +60,29 @@ spec:
   - protocol: TCP
     port: 8000
     targetPort: 8000
-  type: LoadBalancer
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dob-facts-ingress
+  namespace: dob-facts-app
+  annotations:
+    # 👉 CORS config (adjust if needed)
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: dob-facts-backend-service
+            port:
+              number: 8000
+
