@@ -82,7 +82,7 @@ spec:
   - http:
       paths:
       - path: /api(/|$)(.*)
-        pathType: prefix
+        pathType: Prefix
         backend:
           service:
             name: dob-facts-backend-service
