@@ -5,13 +5,3 @@ metadata:
   labels:
     name: dob-facts-app
 
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: acr-cred
-  namespace: dob-facts-app
-type: Opaque
-data:
-  username: #__#ACR_USERNAME#__#    # base64 encoded value of "admin"
-  password: #__#ACR_PASS#__#  # base64 encoded value of "password"
