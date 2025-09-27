@@ -1,3 +1,12 @@
+.custom-datepicker-popup select,
+.custom-datepicker-popup .react-datepicker__navigation-icon {
+  color: #fff !important;
+  background: #23263a !important;
+}
+
+.custom-datepicker-popup .react-datepicker__navigation-icon::before {
+  border-color: #fff !important;
+}
 .custom-datepicker-popup .react-datepicker__day,
 .custom-datepicker-popup .react-datepicker__day-name,
 .custom-datepicker-popup .react-datepicker__current-month {
