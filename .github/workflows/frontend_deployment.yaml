@@ -68,7 +68,13 @@ jobs:
         
     - name: Create the ACR secret in namespace
       run: |
-        kubectl create secret docker-registry acr-cred --docker-server=acrtodoappdev01.azurecr.io --docker-username=${{ secrets.ACR_USERNAME }}  --docker-password=${{ secrets.ACR_PASSWORD }} --docker-email=unused@example.com -n dob-facts-app
+        kubectl create secret docker-registry acr-cred \
+        --docker-server=acrtodoappdev01.azurecr.io \
+        --docker-username=${{ secrets.ACR_USERNAME }} \
+        --docker-password=${{ secrets.ACR_PASSWORD }} \
+        --docker-email=unused@example.com \
+        -n dob-facts-app \
+        --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Deploy Frontend to Kubernetes
       run: |
