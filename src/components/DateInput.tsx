@@ -15,8 +15,8 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (date) {
-      // Format date as yyyy-mm-dd
-      const formatted = date.toISOString().split('T')[0];
+      // Format date as yyyy-mm-dd using local date parts to avoid timezone issues
+      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       onDateSubmit(formatted);
     }
   };
