@@ -9,7 +9,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ACR-secret
+  name: acr-cred
   namespace: dob-facts-app
 type: Opaque
 data:
