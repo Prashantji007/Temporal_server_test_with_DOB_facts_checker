@@ -1,3 +1,11 @@
+.custom-datepicker-popup .react-datepicker__day,
+.custom-datepicker-popup .react-datepicker__day-name,
+.custom-datepicker-popup .react-datepicker__current-month {
+  color: #fff !important;
+}
+.custom-datepicker-popup .react-datepicker__day--disabled {
+  color: #555 !important;
+}
 .custom-datepicker-popup {
   background: #181a2a !important;
   color: #fff !important;
