@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://4.213.192.77';
+const API_BASE_URL = 'http://4.213.192.77/api';
 
 export interface StartAnalysisResponse {
   workflow_id: string;
