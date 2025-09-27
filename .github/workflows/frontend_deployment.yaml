@@ -42,6 +42,8 @@ jobs:
         # Replace placeholders in manifest
         sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/frontend-deployment.yaml
         sed -i "s|#__#IMAGE_TAG#__#|$IMAGE_TAG|g" k8s/frontend-deployment.yaml
+        sed -i "s|#__#ACR_USERNAME#__#|$ACR_USERNAME|g" k8s/namespace.yaml
+         sed -i "s|#__#ACR_PASS#__#|$ACR_USERNAME|g" k8s/namespace.yaml
 
         echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
 
