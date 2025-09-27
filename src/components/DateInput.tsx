@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Sparkles } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface DateInputProps {
   onDateSubmit: (date: string) => void;
@@ -7,16 +9,18 @@ interface DateInputProps {
 }
 
 const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (date) {
-      onDateSubmit(date);
+      // Format date as yyyy-mm-dd
+      const formatted = date.toISOString().split('T')[0];
+      onDateSubmit(formatted);
     }
   };
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
@@ -36,14 +40,18 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
             <label htmlFor="dob" className="block text-sm font-medium text-indigo-200 mb-2">
               Date of Birth
             </label>
-            <input
-              type="date"
+            <DatePicker
               id="dob"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              max={today}
-              required
+              selected={date}
+              onChange={(date) => setDate(date)}
+              maxDate={today}
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Select your birth date"
               className="w-full px-4 py-3 bg-white/5 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+              required
             />
           </div>
 
