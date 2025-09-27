@@ -42,12 +42,10 @@ jobs:
         # Replace placeholders in manifest
         sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/frontend-deployment.yaml
         sed -i "s|#__#IMAGE_TAG#__#|$IMAGE_TAG|g" k8s/frontend-deployment.yaml
-        sed -i "s|#__#ACR_USERNAME#__#|${{ secrets.ACR_USERNAME }}|g" k8s/namespace.yaml
-         sed -i "s|#__#ACR_PASS#__#|${{ secrets.ACR_PASSWORD }}|g" k8s/namespace.yaml
-
+    
         echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
 
-    
+            
 
     - name: Set up Kubernetes
       uses: azure/setup-kubectl@v1
@@ -67,6 +65,10 @@ jobs:
       with:
         resource-group: rg-todoapp-dev
         cluster-name: aks-todoapp-dev01
+        
+    - name: Create the ACR secret in namespace
+      run: |
+        kubectl create secret docker-registry acr-cred --docker-server=acrtodoappdev01.azurecr.io --docker-username=${{ secrets.ACR_USERNAME }}  --docker-password=${{ secrets.ACR_PASSWORD }} --docker-email=unused@example.com -n dob-facts-app
 
     - name: Deploy Frontend to Kubernetes
       run: |
