@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Sparkles } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import './datepicker-custom.css';
 
 interface DateInputProps {
   onDateSubmit: (date: string) => void;
@@ -41,19 +42,27 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
               Date of Birth
             </label>
             <div className="w-full flex justify-center">
-              <DatePicker
-                id="dob"
-                selected={date}
-                onChange={(date) => setDate(date)}
-                maxDate={today}
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select your birth date"
-                className="w-full max-w-xs px-4 py-3 bg-white/5 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 text-center"
-                required
-              />
+              <div className="relative w-full max-w-xs">
+                <DatePicker
+                  id="dob"
+                  selected={date}
+                  onChange={(date) => setDate(date)}
+                  maxDate={today}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select your birth date"
+                  required
+                  className="w-full px-4 py-3 bg-white/5 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 text-center pr-12"
+                  calendarClassName="custom-datepicker-popup"
+                  popperPlacement="bottom"
+                  autoComplete="off"
+                />
+                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <Calendar className="w-6 h-6 text-indigo-300" />
+                </span>
+              </div>
             </div>
           </div>
 
