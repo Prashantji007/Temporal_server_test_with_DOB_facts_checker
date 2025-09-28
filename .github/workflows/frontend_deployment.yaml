@@ -66,6 +66,13 @@ jobs:
         resource-group: rg-todoapp-dev
         cluster-name: aks-todoapp-dev01
         
+
+    - name: Deploy Frontend to Kubernetes
+      run: |
+       kubectl apply -f k8s/namespace.yaml
+       kubectl apply -f k8s/configmap.yaml
+       kubectl apply -f k8s/frontend-deployment.yaml
+
     - name: Create the ACR secret in namespace
       run: |
         kubectl create secret docker-registry acr-cred \
@@ -76,8 +83,3 @@ jobs:
         -n dob-facts-app \
         --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Deploy Frontend to Kubernetes
-      run: |
-       kubectl apply -f k8s/namespace.yaml
-       kubectl apply -f k8s/configmap.yaml
-       kubectl apply -f k8s/frontend-deployment.yaml
