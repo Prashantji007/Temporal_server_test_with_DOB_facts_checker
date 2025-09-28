@@ -1,0 +1,43 @@
+name: SonarQube Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup Python for backend
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      # Setup Node.js for frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install frontend deps
+        run: |
+          npm install
+          npm run build
+
+      # SonarQube Scan
+      - name: SonarQube Scan
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=dob-facts \
+            -Dsonar.sources=backend,frontend \
+            -Dsonar.host.url=http://sonarqube-sonarqube:9000 \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
