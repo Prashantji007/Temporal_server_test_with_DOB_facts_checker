@@ -30,14 +30,23 @@ jobs:
 
       - name: Install frontend deps
         run: |
+          cd frontend
           npm install
           npm run build
 
-      # SonarQube Scan
+      # Install SonarScanner CLI
+      - name: Install SonarScanner
+        run: |
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux.zip
+          unzip sonar-scanner-cli-*.zip -d $HOME
+          echo "$HOME/sonar-scanner-6.2.1.4610-linux/bin" >> $GITHUB_PATH
+
+      # Run SonarQube Scan
       - name: SonarQube Scan
         run: |
           sonar-scanner \
             -Dsonar.projectKey=dob-facts \
             -Dsonar.sources=backend,frontend \
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/** \
             -Dsonar.host.url=http://sonarqube-sonarqube:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
