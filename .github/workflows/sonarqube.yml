@@ -30,7 +30,6 @@ jobs:
 
       - name: Install frontend deps
         run: |
-          cd frontend
           npm install
           npm run build
 
