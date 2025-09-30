@@ -80,7 +80,7 @@ jobs:
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=src,backend \
-            -Dsonar.tests=tests,__tests__,backend \
+            -Dsonar.tests=__tests__,backend \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
             -Dsonar.python.xunit.reportPath=backend/test-reports/pytest-report.xml \
