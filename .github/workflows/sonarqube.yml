@@ -41,13 +41,13 @@ jobs:
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v1
-        with:
-          projectBaseDir: ./
-          args: >
-            -Dsonar.sources=backend,.
+        run: |
+          docker run --rm \
+            -e SONAR_HOST_URL=http://4.187.226.1:9000 \
+            -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} \
+            -v ${{ github.workspace }}:/usr/src \
+            sonarsource/sonar-scanner-cli:latest \
+            -Dsonar.projectKey=dob-fact \
+            -Dsonar.sources=backend,. \
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
-        env:
-          SONAR_HOST_URL: http://4.187.226.1:9000
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64
+
