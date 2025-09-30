@@ -64,11 +64,11 @@ jobs:
       - name: Run frontend unit tests with coverage
         run: |
           npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
-          JEST_JUNIT_OUTPUT_DIR=./test-reports JEST_JUNIT_OUTPUT_NAME=jest-report.xml npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary --ci --testResultsProcessor=jest-junit
+          npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary
           echo "Frontend Coverage Report:"
-          cat coverage/lcov.info
-          echo "Test Report Location:"
-          ls -la test-reports/
+          cat coverage/lcov.info || true
+          echo "Coverage Directory Contents:"
+          ls -la coverage/
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
@@ -81,11 +81,9 @@ jobs:
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=src,backend \
             -Dsonar.tests=__tests__,backend \
-            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
             -Dsonar.python.xunit.reportPath=backend/test-reports/pytest-report.xml \
-            -Dsonar.testExecutionReportPaths=test-reports/jest-report.xml \
             -Dsonar.test.inclusions=**/*test.ts,**/*test.tsx,**/test_*.py \
             -Dsonar.inclusions=**/*.ts,**/*.tsx,**/*.py \
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.*,**/*.test.ts,**/*.test.tsx,**/test_*.py \
