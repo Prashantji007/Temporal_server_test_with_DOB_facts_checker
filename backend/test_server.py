@@ -1,5 +1,5 @@
 import unittest
-from backend import server
+import server
 
 class TestHealthHandler(unittest.TestCase):
     def test_health_check(self):
