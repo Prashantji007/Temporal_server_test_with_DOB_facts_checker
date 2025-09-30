@@ -40,14 +40,14 @@ jobs:
           npm run build
 
       # ✅ SonarQube Scan using GitHub Action updated this
-      - name: SonarQube Scan
+      - name: Run SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v1
         with:
           projectBaseDir: ./
-          extraArgs: >
-            -Dsonar.projectKey=dob-facts
+          args: >
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.projectKey=dob-fact
+            -Dsonar.host.url= http://4.187.226.1:9000
             -Dsonar.sources=backend,.
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
-        env:
-          SONAR_HOST_URL: http://4.187.226.1:9000
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
