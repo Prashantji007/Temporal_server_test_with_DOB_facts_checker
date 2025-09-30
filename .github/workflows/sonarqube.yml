@@ -1,6 +1,9 @@
 name: SonarQube Scan
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   sonar:
