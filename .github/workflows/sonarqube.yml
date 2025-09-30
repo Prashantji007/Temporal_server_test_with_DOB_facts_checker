@@ -38,12 +38,14 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:${{ github.workspace }}
           cd backend
-          pip install coverage
+          pip install coverage pytest pytest-cov
           coverage erase
-          PYTHONPATH=. coverage run --source=. -m unittest test_server.py
+          mkdir -p test-reports
+          PYTHONPATH=. coverage run --source=. -m pytest test_server.py --junitxml=test-reports/pytest-report.xml
           coverage report --fail-under=70
-          coverage xml
+          coverage xml -i
           coverage html
+          ls -la  # Debug: List files to verify reports were generated
 
       # Setup Node.js for frontend
       - name: Set up Node.js
@@ -60,7 +62,8 @@ jobs:
       - name: Run frontend unit tests with coverage
         run: |
           npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
-          npm test -- --coverage
+          npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary
+          ls -la coverage  # Debug: List coverage directory contents
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
@@ -71,9 +74,15 @@ jobs:
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
-            -Dsonar.sources=. \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.sources=src,backend \
+            -Dsonar.tests=__tests__,backend/test_*.py \
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
+            -Dsonar.python.coverage.reportPaths=./backend/coverage.xml \
+            -Dsonar.python.xunit.reportPath=./backend/test-reports/pytest-report.xml \
+            -Dsonar.coverage.exclusions=**/*test*/**,**/tests/**,**/__tests__/**,**/node_modules/** \
+            -Dsonar.test.inclusions=**/*test*/**,**/tests/**,**/__tests__/** \
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.* \
+            -Dsonar.javascript.coveragePlugin=lcov \
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
-            -Dsonar.coverage.exclusions=**/test_*.py,**/*.test.ts,**/*.test.tsx \
-            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**
+            -Dsonar.verbose=true
 
