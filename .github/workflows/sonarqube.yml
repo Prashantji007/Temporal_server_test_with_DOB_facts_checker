@@ -40,5 +40,5 @@ jobs:
             -Dsonar.sources=backend,.
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
         env:
-          SONAR_HOST_URL: http://sonarqube-sonarqube:9000
+          SONAR_HOST_URL: http://4.187.226.1:9000
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
