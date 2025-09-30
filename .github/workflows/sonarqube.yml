@@ -38,14 +38,16 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:${{ github.workspace }}
           cd backend
-          pip install coverage pytest pytest-cov
+          pip install coverage pytest pytest-cov pytest-html
           coverage erase
           mkdir -p test-reports
-          PYTHONPATH=. coverage run --source=. -m pytest test_server.py --junitxml=test-reports/pytest-report.xml
-          coverage report --fail-under=70
-          coverage xml -i
-          coverage html
-          ls -la  # Debug: List files to verify reports were generated
+          PYTHONPATH=. pytest test_server.py --cov=. --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junitxml=test-reports/pytest-report.xml -v
+          echo "Backend Coverage Report:"
+          coverage report
+          echo "Coverage XML Location:"
+          ls -la coverage.xml
+          echo "Test Report Location:"
+          ls -la test-reports/
 
       # Setup Node.js for frontend
       - name: Set up Node.js
@@ -62,8 +64,11 @@ jobs:
       - name: Run frontend unit tests with coverage
         run: |
           npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
-          npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary
-          ls -la coverage  # Debug: List coverage directory contents
+          JEST_JUNIT_OUTPUT_DIR=./test-reports JEST_JUNIT_OUTPUT_NAME=jest-report.xml npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary --ci --testResultsProcessor=jest-junit
+          echo "Frontend Coverage Report:"
+          cat coverage/lcov.info
+          echo "Test Report Location:"
+          ls -la test-reports/
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
@@ -76,15 +81,17 @@ jobs:
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=src,backend \
             -Dsonar.tests=__tests__,backend \
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
+            -Dsonar.python.xunit.reportPath=backend/test-reports/pytest-report.xml \
+            -Dsonar.testExecutionReportPaths=test-reports/jest-report.xml \
             -Dsonar.test.inclusions=**/*test.ts,**/*test.tsx,**/test_*.py \
-            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
-            -Dsonar.python.coverage.reportPaths=./backend/coverage.xml \
-            -Dsonar.python.xunit.reportPath=./backend/test-reports/pytest-report.xml \
             -Dsonar.inclusions=**/*.ts,**/*.tsx,**/*.py \
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.*,**/*.test.ts,**/*.test.tsx,**/test_*.py \
             -Dsonar.javascript.coveragePlugin=lcov \
-            -Dsonar.language=ts,python \
             -Dsonar.sourceEncoding=UTF-8 \
-            -Dsonar.host.url=http://4.187.226.1:9000 \
+            -Dsonar.scm.provider=git \
+            -Dsonar.scm.forceReloadAll=true \
             -Dsonar.verbose=true
 
