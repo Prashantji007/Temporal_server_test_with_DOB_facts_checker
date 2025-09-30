@@ -48,6 +48,6 @@ jobs:
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
-            -Dsonar.sources=backend,. \
+            -Dsonar.sources=. \
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
 
