@@ -2,6 +2,7 @@ import unittest
 import server
 from datetime import datetime, date
 import json
+import io
 from unittest.mock import MagicMock, patch
 import io
 import http.server
@@ -14,6 +15,13 @@ class TestHealthHandler(unittest.TestCase):
         self.assertIn('timestamp', result)
         self.assertIn('service', result)
         self.assertEqual(result['service'], 'dob-facts-backend')
+
+class MockRFile:
+    def __init__(self, content):
+        self.content = content
+    
+    def read(self, length):
+        return self.content
 
 class MockWFile:
     def __init__(self):
