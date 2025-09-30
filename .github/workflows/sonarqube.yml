@@ -79,14 +79,16 @@ jobs:
             -v ${{ github.workspace }}:/usr/src \
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
-            -Dsonar.sources=backend,src \
-            -Dsonar.tests=backend/tests,__tests__ \
+            -Dsonar.sources=src,backend \
+            -Dsonar.tests=tests,__tests__,backend \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
             -Dsonar.python.xunit.reportPath=backend/test-reports/pytest-report.xml \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.test.inclusions=**/test_*.py,**/*test.ts,**/*test.tsx \
-            -Dsonar.inclusions=**/*.py,**/*.ts,**/*.tsx \
+            -Dsonar.inclusions=**/*.ts,**/*.tsx,**/*.py \
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.*,**/*.test.ts,**/*.test.tsx,**/test_*.py \
+            -Dsonar.javascript.coveragePlugin=lcov \
             -Dsonar.sourceEncoding=UTF-8 \
             -Dsonar.scm.provider=git \
+            -Dsonar.scm.forceReloadAll=true \
             -Dsonar.verbose=true
