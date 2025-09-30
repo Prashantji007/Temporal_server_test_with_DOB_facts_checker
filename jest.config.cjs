@@ -9,8 +9,16 @@ const config = {
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
+    '!src/main.tsx',
+    '!src/vite-env.d.ts'
   ],
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['lcov', 'text-summary'],
+  moduleNameMapper: {
+    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
+  },
+  transform: {
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
+  },
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
   },

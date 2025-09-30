@@ -64,7 +64,7 @@ jobs:
       - name: Run frontend unit tests with coverage
         run: |
           npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
-          npm test -- --coverage --coverageReporters=lcov --coverageReporters=text-summary
+          npm test -- --coverage
           echo "Frontend Coverage Report:"
           cat coverage/lcov.info || true
           echo "Coverage Directory Contents:"

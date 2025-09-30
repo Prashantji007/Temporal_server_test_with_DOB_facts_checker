@@ -8,22 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts",
-      "!src/main.tsx",
-      "!src/vite-env.d.ts"
-    ],
-    "coverageReporters": [
-      "lcov",
-      "text-summary"
-    ],
-    "coverageDirectory": "coverage"
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:coverage": "jest --config jest.config.cjs --coverage"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
