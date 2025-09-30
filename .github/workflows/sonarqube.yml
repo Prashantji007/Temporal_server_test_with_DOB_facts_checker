@@ -36,8 +36,9 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:${{ github.workspace }}
           cd backend
           pip install coverage
-          coverage run -m unittest test_server.py
-          coverage report
+          coverage erase
+          PYTHONPATH=. coverage run --source=. -m unittest test_server.py
+          coverage report --fail-under=70
           coverage html
 
       # Setup Node.js for frontend
