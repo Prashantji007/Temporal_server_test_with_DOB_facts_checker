@@ -15,27 +15,6 @@ class TestHealthHandler(unittest.TestCase):
         self.assertIn('service', result)
         self.assertEqual(result['service'], 'dob-facts-backend')
 
-class MockSocket:
-    def makefile(self, *args, **kwargs):
-        return None
-
-class MockServer:
-    def __init__(self):
-        self.server_name = "test_server"
-        self.server_port = 8000
-
-class MockRequest:
-    def __init__(self):
-        self.socket = MockSocket()
-        self._sock = MockSocket()
-
-class MockRFile:
-    def __init__(self, content):
-        self.content = content
-    
-    def read(self, length):
-        return self.content
-
 class MockWFile:
     def __init__(self):
         self.content = b''
@@ -43,33 +22,113 @@ class MockWFile:
     def write(self, content):
         self.content += content if isinstance(content, bytes) else content.encode('utf-8')
 
+class MockDOBFactsHandler(server.DOBFactsHandler):
+    def __init__(self, workflow_engine):
+        self.workflow_engine = workflow_engine
+        self.wfile = MockWFile()
+        self.headers = {}
+        self.sent_headers = {}
+        self.sent_response = None
+        self.ended_headers = False
+        
+    def send_response(self, code):
+        self.sent_response = code
+        
+    def send_header(self, name, value):
+        self.sent_headers[name] = value
+        
+    def end_headers(self):
+        self.ended_headers = True
+
 class TestDOBFactsHandler(unittest.TestCase):
     def setUp(self):
         self.workflow_engine = server.WorkflowEngine()
-        self.request = MockRequest()
-        self.server = MockServer()
+        self.handler = MockDOBFactsHandler(self.workflow_engine)
         
-        # Create a handler without calling parent class __init__
-        self.handler = server.DOBFactsHandler(self.request, ('127.0.0.1', 8000), self.server)
-        # Manually set required attributes
-        self.handler.rfile = MockRFile(b'')
+    def test_handle_health_check(self):
+        self.handler._handle_health_check()
+        response = json.loads(self.handler.wfile.content)
+        self.assertEqual(response['status'], 'healthy')
+        self.assertEqual(response['service'], 'dob-facts-backend')
+        self.assertIn('timestamp', response)
+        
+        # Verify headers
+        self.assertEqual(self.handler.sent_response, 200)
+        self.assertEqual(self.handler.sent_headers.get('Content-Type'), 'application/json')
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Origin'), '*')
+        self.assertTrue(self.handler.ended_headers)
+    
+    def test_handle_analyze(self):
+        # Prepare test data
+        test_data = json.dumps({'dob': '2000-01-01'}).encode('utf-8')
+        self.handler.rfile = io.BytesIO(test_data)
+        self.handler.headers = {'Content-Length': str(len(test_data))}
+        
+        # Test the endpoint
+        self.handler._handle_analyze()
+        response = json.loads(self.handler.wfile.content)
+        
+        # Verify response
+        self.assertIn('workflow_id', response)
+        self.assertTrue(response['workflow_id'].startswith('dob_analysis_'))
+        
+        # Verify headers
+        self.assertEqual(self.handler.sent_response, 200)
+        self.assertEqual(self.handler.sent_headers.get('Content-Type'), 'application/json')
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Origin'), '*')
+        self.assertTrue(self.handler.ended_headers)
+    
+    def test_handle_analyze_invalid_json(self):
+        # Prepare invalid JSON data
+        test_data = b'invalid json'
+        self.handler.rfile = io.BytesIO(test_data)
+        self.handler.headers = {'Content-Length': str(len(test_data))}
+        
+        # Test the endpoint
+        self.handler._handle_analyze()
+        response = json.loads(self.handler.wfile.content)
+        
+        # Verify error response
+        self.assertIn('error', response)
+        self.assertEqual(self.handler.sent_response, 400)
+    
+    def test_options_request(self):
+        self.handler.do_OPTIONS()
+        
+        # Verify CORS headers
+        self.assertEqual(self.handler.sent_response, 200)
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Origin'), '*')
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Methods'), 'GET, POST, OPTIONS')
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Headers'), 'Content-Type')
+        self.assertTrue(self.handler.ended_headers)
+    
+    def test_workflow_status(self):
+        # Start a workflow first
+        test_data = json.dumps({'dob': '2000-01-01'}).encode('utf-8')
+        self.handler.rfile = io.BytesIO(test_data)
+        self.handler.headers = {'Content-Length': str(len(test_data))}
+        self.handler._handle_analyze()
+        workflow_id = json.loads(self.handler.wfile.content)['workflow_id']
+        
+        # Reset handler state
         self.handler.wfile = MockWFile()
-        self.handler.headers = {'Content-Length': '0'}
-        self.handler.workflow_engine = self.workflow_engine
-        self.sent_headers = {}
+        self.handler.sent_headers.clear()
+        self.handler.ended_headers = False
         
-        # Mock methods that interact with HTTP
-        def mock_send_header(name, value):
-            self.sent_headers[name] = value
-        self.handler.send_header = mock_send_header
-        self.handler.end_headers = lambda: None
-        self.handler.send_response = lambda x: None
+        # Test workflow status endpoint
+        self.handler.path = f'/api/workflow/{workflow_id}'
+        self.handler._handle_workflow_status(workflow_id)
         
-        # Bypass parent class initialization
-        self.handler.command = 'GET'
-        self.handler.path = ''
-        self.handler.client_address = ('127.0.0.1', 12345)
-        self.handler.server = self.server
+        # Verify response
+        response = json.loads(self.handler.wfile.content)
+        self.assertEqual(response['id'], workflow_id)
+        self.assertIn('status', response)
+        self.assertIn('current_step', response)
+        
+        # Verify headers
+        self.assertEqual(self.handler.sent_response, 200)
+        self.assertEqual(self.handler.sent_headers.get('Content-Type'), 'application/json')
+        self.assertEqual(self.handler.sent_headers.get('Access-Control-Allow-Origin'), '*')
     
     @patch('http.server.SimpleHTTPRequestHandler.__init__')
     def test_handle_health_check(self, mock_init):
