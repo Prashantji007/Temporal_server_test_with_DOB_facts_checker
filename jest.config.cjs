@@ -10,6 +10,7 @@ const config = {
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
   ],
+  coverageReporters: ['text', 'lcov', 'html'],
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
   },

@@ -42,6 +42,7 @@ jobs:
           coverage erase
           PYTHONPATH=. coverage run --source=. -m unittest test_server.py
           coverage report --fail-under=70
+          coverage xml
           coverage html
 
       # Setup Node.js for frontend
@@ -71,5 +72,8 @@ jobs:
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=. \
-            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
+            -Dsonar.coverage.exclusions=**/test_*.py,**/*.test.ts,**/*.test.tsx \
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**
 
