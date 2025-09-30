@@ -15,6 +15,20 @@ class TestHealthHandler(unittest.TestCase):
         self.assertIn('service', result)
         self.assertEqual(result['service'], 'dob-facts-backend')
 
+class MockSocket:
+    def makefile(self, *args, **kwargs):
+        return None
+
+class MockServer:
+    def __init__(self):
+        self.server_name = "test_server"
+        self.server_port = 8000
+
+class MockRequest:
+    def __init__(self):
+        self.socket = MockSocket()
+        self._sock = MockSocket()
+
 class MockRFile:
     def __init__(self, content):
         self.content = content
@@ -29,12 +43,16 @@ class MockWFile:
     def write(self, content):
         self.content += content if isinstance(content, bytes) else content.encode('utf-8')
 
+@patch('http.server.SimpleHTTPRequestHandler.__init__')
 class TestDOBFactsHandler(unittest.TestCase):
-    def setUp(self):
+    def setUp(self, mock_init):
+        mock_init.return_value = None
         self.workflow_engine = server.WorkflowEngine()
-        self.handler = server.DOBFactsHandler(None, None, None)
+        self.request = MockRequest()
+        self.server = MockServer()
+        self.handler = server.DOBFactsHandler(self.request, ('127.0.0.1', 8000), self.server)
         self.handler.workflow_engine = self.workflow_engine
-        self.handler.rfile = None
+        self.handler.rfile = MockRFile(b'')
         self.handler.wfile = MockWFile()
         self.handler.headers = {'Content-Length': '0'}
         self.sent_headers = {}
@@ -150,9 +168,18 @@ class TestWorkflowEngine(unittest.TestCase):
         workflow_id = self.engine.start_workflow('test_full', 'analyze_dob', {'dob': '2000-01-01'})
         # Give some time for the background thread to process
         import time
-        time.sleep(2)
+        max_wait = 10  # Maximum seconds to wait
+        interval = 0.5  # Check every 0.5 seconds
+        elapsed = 0
         
-        status = self.engine.get_workflow_status(workflow_id)
+        status = None
+        while elapsed < max_wait:
+            status = self.engine.get_workflow_status(workflow_id)
+            if status['status'] == 'completed':
+                break
+            time.sleep(interval)
+            elapsed += interval
+        
         self.assertEqual(status['status'], 'completed')
         self.assertIn('results', status)
         self.assertIn('validated_dob', status['results'])
