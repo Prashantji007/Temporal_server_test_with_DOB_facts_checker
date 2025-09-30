@@ -1,0 +1,15 @@
+# .coveragerc for Python coverage reporting
+[run]
+branch = True
+source = backend
+
+[report]
+omit =
+    */__init__.py
+    */test_*.py
+    */tests/*
+show_missing = True
+skip_covered = True
+
+[html]
+directory = coverage_html_report
