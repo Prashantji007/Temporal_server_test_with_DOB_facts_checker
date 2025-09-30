@@ -43,33 +43,45 @@ class MockWFile:
     def write(self, content):
         self.content += content if isinstance(content, bytes) else content.encode('utf-8')
 
-@patch('http.server.SimpleHTTPRequestHandler.__init__')
 class TestDOBFactsHandler(unittest.TestCase):
-    def setUp(self, mock_init):
-        mock_init.return_value = None
+    def setUp(self):
         self.workflow_engine = server.WorkflowEngine()
         self.request = MockRequest()
         self.server = MockServer()
+        
+        # Create a handler without calling parent class __init__
         self.handler = server.DOBFactsHandler(self.request, ('127.0.0.1', 8000), self.server)
-        self.handler.workflow_engine = self.workflow_engine
+        # Manually set required attributes
         self.handler.rfile = MockRFile(b'')
         self.handler.wfile = MockWFile()
         self.handler.headers = {'Content-Length': '0'}
+        self.handler.workflow_engine = self.workflow_engine
         self.sent_headers = {}
         
+        # Mock methods that interact with HTTP
         def mock_send_header(name, value):
             self.sent_headers[name] = value
         self.handler.send_header = mock_send_header
         self.handler.end_headers = lambda: None
         self.handler.send_response = lambda x: None
+        
+        # Bypass parent class initialization
+        self.handler.command = 'GET'
+        self.handler.path = ''
+        self.handler.client_address = ('127.0.0.1', 12345)
+        self.handler.server = self.server
     
-    def test_handle_health_check(self):
+    @patch('http.server.SimpleHTTPRequestHandler.__init__')
+    def test_handle_health_check(self, mock_init):
+        mock_init.return_value = None
         self.handler._handle_health_check()
         response = json.loads(self.handler.wfile.content)
         self.assertEqual(response['status'], 'healthy')
         self.assertEqual(response['service'], 'dob-facts-backend')
     
-    def test_handle_analyze(self):
+    @patch('http.server.SimpleHTTPRequestHandler.__init__')
+    def test_handle_analyze(self, mock_init):
+        mock_init.return_value = None
         test_data = json.dumps({'dob': '2000-01-01'}).encode('utf-8')
         self.handler.rfile = MockRFile(test_data)
         self.handler.headers = {'Content-Length': str(len(test_data))}
