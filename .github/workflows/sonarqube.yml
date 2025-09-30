@@ -75,14 +75,16 @@ jobs:
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=src,backend \
-            -Dsonar.tests=__tests__,backend/test_*.py \
+            -Dsonar.tests=__tests__,backend \
+            -Dsonar.test.inclusions=**/*test.ts,**/*test.tsx,**/test_*.py \
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
             -Dsonar.python.coverage.reportPaths=./backend/coverage.xml \
             -Dsonar.python.xunit.reportPath=./backend/test-reports/pytest-report.xml \
-            -Dsonar.coverage.exclusions=**/*test*/**,**/tests/**,**/__tests__/**,**/node_modules/** \
-            -Dsonar.test.inclusions=**/*test*/**,**/tests/**,**/__tests__/** \
-            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.* \
+            -Dsonar.inclusions=**/*.ts,**/*.tsx,**/*.py \
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**,**/coverage/**,**/*.config.*,**/*.test.ts,**/*.test.tsx,**/test_*.py \
             -Dsonar.javascript.coveragePlugin=lcov \
-            -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
+            -Dsonar.language=ts,python \
+            -Dsonar.sourceEncoding=UTF-8 \
+            -Dsonar.host.url=http://4.187.226.1:9000 \
             -Dsonar.verbose=true
 
