@@ -45,9 +45,9 @@ jobs:
         with:
           projectBaseDir: ./
           args: >
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.projectKey=dob-fact
-            -Dsonar.host.url= http://4.187.226.1:9000
             -Dsonar.sources=backend,.
             -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/__pycache__/**
-
+        env:
+          SONAR_HOST_URL: http://4.187.226.1:9000
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64
