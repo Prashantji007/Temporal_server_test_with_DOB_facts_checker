@@ -30,6 +30,15 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
+      # Run backend unit tests with coverage
+      - name: Run backend unit tests with coverage
+        run: |
+          cd backend
+          pip install coverage
+          coverage run -m unittest test_server.py
+          coverage report
+          coverage html
+
       # Setup Node.js for frontend
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -40,6 +49,12 @@ jobs:
         run: |
           npm install
           npm run build
+
+      # Run frontend unit tests with coverage
+      - name: Run frontend unit tests with coverage
+        run: |
+          npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
+          npm test -- --coverage
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
