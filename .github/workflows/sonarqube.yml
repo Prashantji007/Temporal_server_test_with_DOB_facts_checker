@@ -30,7 +30,7 @@ jobs:
           npm install
           npm run build
 
-      # ✅ SonarQube Scan using GitHub Action
+      # ✅ SonarQube Scan using GitHub Action updated this
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v1
         with:
