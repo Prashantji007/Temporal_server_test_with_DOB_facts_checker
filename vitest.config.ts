@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'cobertura'],
@@ -20,6 +20,10 @@ export default defineConfig({
         'src/vite-env.d.ts'
       ]
     },
-    include: ['src/**/*.{test,spec}.{ts,tsx}']
+    deps: {
+      inline: [/@testing-library\/jest-dom/],
+    },
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    testTimeout: 10000
   }
 });

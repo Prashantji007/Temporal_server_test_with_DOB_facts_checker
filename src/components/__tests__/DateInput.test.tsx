@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DateInput from '../src/components/DateInput';
+import DateInput from '../DateInput';
 
 describe('DateInput', () => {
   it('renders and submits a date', async () => {
