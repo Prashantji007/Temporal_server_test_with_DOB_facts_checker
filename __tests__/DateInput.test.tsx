@@ -1,6 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DateInput from '../src/components/DateInput';
+import React from 'react';
+
+// Set up user-event
+const user = userEvent.setup();
 
 // Mock the DatePicker component
 jest.mock('react-datepicker', () => {

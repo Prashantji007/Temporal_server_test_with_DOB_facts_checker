@@ -19,12 +19,6 @@ const config = {
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
   },
-  transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
-  },
-  moduleNameMapper: {
-    '\\.(css|less|sass|scss)$': 'identity-obj-proxy'
-  },
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 }
