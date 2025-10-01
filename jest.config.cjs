@@ -15,10 +15,24 @@ const config = {
   coverageReporters: ['lcov', 'text-summary'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
+    '^@/(.*)$': '<rootDir>/src/$1'
   },
   transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest'
+    '^.+\\.(ts|tsx)$': [
+      'babel-jest',
+      {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          '@babel/preset-typescript',
+          ['@babel/preset-react', { runtime: 'automatic' }]
+        ]
+      }
+    ],
+    '^.+\\.(js|jsx)$': ['babel-jest']
   },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(@testing-library/user-event)/)'
+  ],
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 }
