@@ -1,13 +1,21 @@
 {
-  "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "types": ["jest", "@testing-library/jest-dom"],
-    "isolatedModules": false,
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
+    "target": "es2018",
+    "module": "commonjs",
+    "lib": ["es2018"],
+    "strict": true,
     "esModuleInterop": true,
-    "jsx": "react-jsx"
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "node"],
+    "outDir": "./dist"
   },
-  "include": ["src", "__tests__"]
+  "include": [
+    "backend/**/*",
+    "__tests__/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "__tests_fe__"
+  ]
 }

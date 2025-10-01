@@ -1,18 +1,18 @@
 /** @type {import('jest').Config} */
 const config = {
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
+  testEnvironment: 'node',
+  roots: ['<rootDir>/backend', '<rootDir>/__tests__'],
   transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': ['babel-jest']
+    '^.+\\.ts$': ['babel-jest']
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.ts$',
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: [
     'lcov',
     'text-summary',
-    'cobertura'  // for Azure DevOps
+    'cobertura'
   ],
   reporters: [
     'default',
@@ -25,9 +25,14 @@ const config = {
       usePathForSuiteName: true
     }]
   ],
-  moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
-  }
+  testPathIgnorePatterns: [
+    '/__tests_fe__/',
+    '/node_modules/'
+  ],
+  collectCoverageFrom: [
+    'backend/**/*.ts',
+    '!backend/**/*.d.ts'
+  ]
 };
 
 module.exports = config;
