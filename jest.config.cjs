@@ -1,18 +1,35 @@
 /** @type {import('jest').Config} */
 const config = {
-  testEnvironment: 'node',
-  roots: ['<rootDir>/backend', '<rootDir>/__tests__'],
+  testEnvironment: 'jsdom',
+  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   transform: {
-    '^.+\\.ts$': ['babel-jest']
+    '^.+\\.(ts|tsx|js|jsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        '@babel/preset-typescript',
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ]
+    }]
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.ts$',
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: [
-    'lcov',
-    'text-summary',
-    'cobertura'
+    'lcov',        // for SonarQube
+    'cobertura',   // XML format
+    'text-summary' // Console output
+  ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '\\.d\\.ts$',
+    'src/main.tsx',
+    'src/vite-env.d.ts'
+  ],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx,js,jsx}',
+    '!src/**/*.d.ts'
   ],
   reporters: [
     'default',
@@ -25,14 +42,9 @@ const config = {
       usePathForSuiteName: true
     }]
   ],
-  testPathIgnorePatterns: [
-    '/__tests_fe__/',
-    '/node_modules/'
-  ],
-  collectCoverageFrom: [
-    'backend/**/*.ts',
-    '!backend/**/*.d.ts'
-  ]
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  }
 };
 
 module.exports = config;

@@ -5,6 +5,10 @@ import DateInput from '../src/components/DateInput';
 import React from 'react';
 import '@testing-library/jest-dom';
 
+// Mock the current date to be fixed
+jest.useFakeTimers();
+jest.setSystemTime(new Date('2025-10-01'));
+
 // Mock the current date
 const mockDate = new Date('2025-10-01');
 const RealDate = Date;
