@@ -23,6 +23,12 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
       return;
     }
 
+    // Validate that date is a valid Date object
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      setError('Please enter a valid date');
+      return;
+    }
+
     if (date > today) {
       setError('Future dates are not allowed');
       return;
@@ -60,7 +66,7 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
                 <DatePicker
                   id="dob"
                   selected={date}
-                  onChange={(date) => setDate(date)}
+                  onChange={(date: Date | null) => setDate(date)}
                   maxDate={today}
                   showMonthDropdown
                   showYearDropdown

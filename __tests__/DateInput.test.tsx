@@ -15,7 +15,9 @@ jest.mock('react-datepicker', () => {
       value={selected ? selected.toISOString().split('T')[0] : ''}
       onChange={(e) => {
         const date = new Date(e.target.value);
-        onChange(date);
+        if (!isNaN(date.getTime())) {
+          onChange(date);
+        }
       }}
       {...props}
     />
