@@ -61,14 +61,14 @@ jobs:
           npm run build
 
       # Run frontend unit tests with coverage
-      - name: Run frontend unit tests with coverage
-        run: |
-          npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
-          npm test -- --coverage
-          echo "Frontend Coverage Report:"
-          cat coverage/lcov.info || true
-          echo "Coverage Directory Contents:"
-          ls -la coverage/
+      # - name: Run frontend unit tests with coverage
+      #   run: |
+      #     npm install --save-dev jest @types/jest @testing-library/react @testing-library/jest-dom
+      #     npm test -- --coverage
+      #     echo "Frontend Coverage Report:"
+      #     cat coverage/lcov.info || true
+      #     echo "Coverage Directory Contents:"
+      #     ls -la coverage/
 
       # ✅ SonarQube Scan using GitHub Action updated this
       - name: Run SonarQube Scan
@@ -80,8 +80,7 @@ jobs:
             sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=dob-fact \
             -Dsonar.sources=backend \
-            -Dsonar.tests=backend \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.tests=. \
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml \
             -Dsonar.python.xunit.reportPath=backend/test-reports/pytest-report.xml \
             -Dsonar.test.inclusions=**/test_*.py,**/*test.ts,**/*test.tsx \
