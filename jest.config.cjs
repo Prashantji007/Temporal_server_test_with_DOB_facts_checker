@@ -1,36 +1,33 @@
 /** @type {import('jest').Config} */
 const config = {
-  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
-  setupFilesAfterEnv: ['./jest.setup.cjs'],
   testEnvironment: 'jsdom',
+  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
+  transform: {
+    '^.+\\.(ts|tsx|js|jsx)$': ['babel-jest']
+  },
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/main.tsx',
-    '!src/vite-env.d.ts'
+  coverageReporters: [
+    'lcov',
+    'text-summary',
+    'cobertura'  // for Azure DevOps
   ],
-  coverageReporters: ['lcov', 'text-summary'],
-  moduleNameMapper: {
-    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
-  transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        '@babel/preset-typescript',
-        ['@babel/preset-react', { runtime: 'automatic' }]
-      ]
+  reporters: [
+    'default',
+    ['jest-junit', {
+      outputDirectory: 'coverage',
+      outputName: 'junit.xml',
+      classNameTemplate: '{classname}',
+      titleTemplate: '{title}',
+      ancestorSeparator: ' › ',
+      usePathForSuiteName: true
     }]
-  },
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@testing-library/user-event)/)'
   ],
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
-}
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  }
+};
 
-module.exports = config
+module.exports = config;
