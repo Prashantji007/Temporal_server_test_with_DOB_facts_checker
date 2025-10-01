@@ -1,1 +1,0 @@
-npm install --save-dev @testing-library/react @testing-library/jest-dom @types/jest jest jest-environment-jsdom ts-jest babel-jest @babel/preset-env @babel/preset-react @babel/preset-typescript identity-obj-proxy @testing-library/user-event
