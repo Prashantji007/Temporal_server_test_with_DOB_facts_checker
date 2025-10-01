@@ -14,6 +14,13 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
   const [error, setError] = useState<string>('');
   const today = new Date();
 
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -35,9 +42,7 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
     }
 
     try {
-      // Format date as yyyy-mm-dd using local date parts to avoid timezone issues
-      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      onDateSubmit(formatted);
+      onDateSubmit(formatDate(date));
     } catch (err) {
       setError('Please enter a valid date');
     }
@@ -87,9 +92,9 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
             </div>
           </div>
 
-          {error && (
-            <div className="w-full max-w-xs text-red-400 text-sm text-center mt-2">{error}</div>
-          )}
+          <div className="w-full max-w-xs text-red-400 text-sm text-center mt-2" role="alert" aria-live="polite">
+            {error}
+          </div>
 
           <button
             type="submit"

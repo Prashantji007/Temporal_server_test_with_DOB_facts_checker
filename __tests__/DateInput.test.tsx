@@ -1,9 +1,11 @@
 /// <reference types="@testing-library/jest-dom" />
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DateInput from '../src/components/DateInput';
 import React from 'react';
 import '@testing-library/jest-dom';
+
+const user = userEvent.setup();
 
 type HTMLElementEvent<T extends HTMLElement> = { target: T } & Event;
 
@@ -11,27 +13,32 @@ type HTMLElementEvent<T extends HTMLElement> = { target: T } & Event;
 const user = userEvent.setup();
 
 // Mock the DatePicker component
-jest.mock('react-datepicker', () => {
-  const DatePicker = ({ selected, onChange, maxDate, ...props }: any) => (
-    <input
-      data-testid="date-picker"
-      type="text"
-      value={selected ? selected.toISOString().split('T')[0] : ''}
-      onChange={(e) => {
-        const date = new Date(e.target.value);
-        if (!isNaN(date.getTime())) {
-          // Check if date is after maxDate
-          if (maxDate && date > maxDate) {
-            return;
-          }
-          onChange(date);
-        }
-      }}
-      {...props}
-    />
-  );
-  return DatePicker;
-});
+jest.mock('react-datepicker', () => ({
+  __esModule: true,
+  default: function DatePicker({ selected, onChange, maxDate, ...props }: any) {
+    const handleDateChange = (e: { target: { value: string } }) => {
+      try {
+        const [year, month, day] = e.target.value.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        if (date.toString() === 'Invalid Date') return;
+        if (maxDate && date > maxDate) return;
+        onChange(date);
+      } catch (err) {
+        // Invalid date format
+      }
+    };
+
+    return (
+      <input
+        data-testid="date-picker"
+        type="date"
+        value={selected ? selected.toISOString().split('T')[0] : ''}
+        onChange={handleDateChange}
+        {...props}
+      />
+    );
+  }
+}));
 
 describe('DateInput', () => {
   it('renders and submits a date', async () => {
