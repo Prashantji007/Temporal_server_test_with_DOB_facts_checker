@@ -5,10 +5,20 @@ describe('WorkflowTracker', () => {
   const mockWorkflow = {
     id: 'test-workflow',
     type: 'analyze_dob',
-    status: 'in_progress',
+    status: 'running',
     current_step: 1,
+    steps: [
+      'Validating Date',
+      'Calculating Age',
+      'Determining Zodiac', 
+      'Computing Numerology',
+      'Finding Day of Week',
+      'Generating Fun Facts',
+      'Completing Analysis'
+    ],
     data: { dob: '2000-01-01' },
-    results: {}
+    results: {},
+    started_at: new Date().toISOString()
   };
 
   it('displays workflow steps', () => {
@@ -19,7 +29,7 @@ describe('WorkflowTracker', () => {
 
   it('shows loading state correctly', () => {
     render(<WorkflowTracker workflow={mockWorkflow} isAnalyzing={true} />);
-    expect(screen.getByText('in_progress')).toBeInTheDocument();
+    expect(screen.getByText('running')).toBeInTheDocument();
     expect(screen.getByText('Workflow Progress')).toBeInTheDocument();
   });
 

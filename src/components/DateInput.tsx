@@ -11,14 +11,25 @@ interface DateInputProps {
 
 const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
   const [date, setDate] = useState<Date | null>(null);
+  const [error, setError] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (date) {
-      // Format date as yyyy-mm-dd using local date parts to avoid timezone issues
-      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      onDateSubmit(formatted);
+    setError('');
+
+    if (!date) {
+      setError('Please select a date');
+      return;
     }
+
+    if (date > new Date()) {
+      setError('Future dates are not allowed');
+      return;
+    }
+
+    // Format date as yyyy-mm-dd using local date parts to avoid timezone issues
+    const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    onDateSubmit(formatted);
   };
 
   const today = new Date();
@@ -66,6 +77,10 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
             </div>
           </div>
 
+          {error && (
+            <div className="text-red-400 text-sm mt-2">{error}</div>
+          )}
+
           <button
             type="submit"
             disabled={!date || isLoading}
@@ -74,7 +89,7 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Starting Analysis...</span>
+                <span>Analyzing...</span>
               </>
             ) : (
               <>
