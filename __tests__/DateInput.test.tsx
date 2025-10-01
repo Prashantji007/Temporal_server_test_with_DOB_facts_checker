@@ -1,14 +1,18 @@
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DateInput from '../src/components/DateInput';
 import React from 'react';
+import '@testing-library/jest-dom';
+
+type HTMLElementEvent<T extends HTMLElement> = { target: T } & Event;
 
 // Set up user-event
 const user = userEvent.setup();
 
 // Mock the DatePicker component
 jest.mock('react-datepicker', () => {
-  const DatePicker = ({ selected, onChange, ...props }: any) => (
+  const DatePicker = ({ selected, onChange, maxDate, ...props }: any) => (
     <input
       data-testid="date-picker"
       type="text"
@@ -16,6 +20,10 @@ jest.mock('react-datepicker', () => {
       onChange={(e) => {
         const date = new Date(e.target.value);
         if (!isNaN(date.getTime())) {
+          // Check if date is after maxDate
+          if (maxDate && date > maxDate) {
+            return;
+          }
           onChange(date);
         }
       }}
@@ -31,8 +39,13 @@ describe('DateInput', () => {
     render(<DateInput onDateSubmit={onDateSubmit} isLoading={false} />);
     const input = screen.getByTestId('date-picker');
     
+    // Simulate date selection
+    const testDate = new Date('2000-01-01');
     await userEvent.clear(input);
+    const inputEvent = new Event('change');
+    Object.defineProperty(inputEvent, 'target', { value: { value: '2000-01-01' } });
     await userEvent.type(input, '2000-01-01');
+    input.dispatchEvent(inputEvent);
     
     const button = screen.getByRole('button', { name: /analyze birth date/i });
     await userEvent.click(button);
