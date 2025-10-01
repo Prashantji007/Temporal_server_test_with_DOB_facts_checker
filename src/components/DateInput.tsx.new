@@ -1,25 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Sparkles } from 'lucide-react'  className="w-full max-w-xs py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2 mt-4"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Analyzing...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                <span>Analyze Birth Date</span>
-              </>
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-export default DateInput;
+import { Calendar, Sparkles } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker-custom.css';
@@ -109,6 +89,7 @@ const DateInput: React.FC<DateInputProps> = ({ onDateSubmit, isLoading }) => {
             type="submit"
             disabled={!date || isLoading}
             className="w-full max-w-xs py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2 mt-4"
+          >
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

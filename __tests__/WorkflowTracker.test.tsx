@@ -37,7 +37,7 @@ describe('WorkflowTracker', () => {
     const completedWorkflow = {
       ...mockWorkflow,
       status: 'completed',
-      current_step: 6
+      current_step: 7
     };
     render(<WorkflowTracker workflow={completedWorkflow} isAnalyzing={false} />);
     expect(screen.getByText('completed')).toBeInTheDocument();
