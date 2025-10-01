@@ -5,9 +5,18 @@ import DateInput from '../src/components/DateInput';
 import React from 'react';
 import '@testing-library/jest-dom';
 
-const user = userEvent.setup();
-
-type HTMLElementEvent<T extends HTMLElement> = { target: T } & Event;
+// Mock the current date
+const mockDate = new Date('2025-10-01');
+const RealDate = Date;
+(global as any).Date = class extends RealDate {
+  constructor(date?: string | number | Date) {
+    if (date) {
+      super(date);
+      return;
+    }
+    super(mockDate);
+  }
+};
 
 // Set up user-event
 const user = userEvent.setup();

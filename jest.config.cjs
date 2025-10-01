@@ -19,16 +19,18 @@ const config = {
   },
   transform: {
     '^.+\\.(ts|tsx)$': [
-      'babel-jest',
+      'ts-jest',
       {
-        presets: [
-          ['@babel/preset-env', { targets: { node: 'current' } }],
-          '@babel/preset-typescript',
-          ['@babel/preset-react', { runtime: 'automatic' }]
-        ]
+        tsconfig: 'tsconfig.test.json',
+        useESM: true
       }
     ],
-    '^.+\\.(js|jsx)$': ['babel-jest']
+    '^.+\\.(js|jsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ]
+    }]
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(@testing-library/user-event)/)'
