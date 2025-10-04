@@ -67,14 +67,14 @@ jobs:
       with:
         entryPoint: sonar-scanner
         args: >
-          -Dproject.settings=sonar-project-backend.properties
+          "-Dproject.settings=sonar-project-backend.properties
           -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
           -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}"
           -Dsonar.projectVersion=${{ github.run_number }}
           -Dsonar.sources=backend
           -Dsonar.python.coverage.reportPaths= backend/tests/coverage.xml
           -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}"
     
     
 
