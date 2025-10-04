@@ -50,7 +50,7 @@ jobs:
     - name: Run backend tests
       run: |
         coverage run -m pytest backend/tests/test_server.py
-        coverage xml -o ./tests/coverage.xml
+        coverage xml -o backend/tests/coverage.xml
         coverage report
 
     # 6️⃣ Set up JDK 17 for SonarQube
