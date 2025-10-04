@@ -53,6 +53,8 @@ jobs:
     # 5️⃣ Run SonarQube Scan
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v1
+      env:
+       JAVA_HOME: ${{ steps.setup-java.outputs.path }}
       with:
         args: >
           -Dsonar.projectVersion=${{ github.run_number }}
