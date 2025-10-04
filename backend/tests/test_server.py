@@ -1,5 +1,4 @@
 import unittest
-import server
 from datetime import datetime, date
 import json
 import io
