@@ -64,14 +64,14 @@ jobs:
     # 7️⃣ Run SonarScanner using official action
     - name: Run SonarScanner
       uses: SonarSource/sonarqube-scan-action@v2
-      with:
-        projectKey: ${{ env.SONAR_PROJECT_KEY }}
-        projectName: ${{ env.SONAR_PROJECT_NAME }}
-        projectVersion: ${{ github.run_number }}
-        sources: backend
-        pythonCoverageReportPaths: backend/tests/coverage.xml
-        hostUrl: ${{ env.SONAR_HOST_URL }}
-        login: ${{ secrets.SONAR_TOKEN }}
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        SONAR_PROJECT_KEY: ${{ env.SONAR_PROJECT_KEY }}
+        SONAR_PROJECT_NAME: ${{ env.SONAR_PROJECT_NAME }}
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+        SOURCES: backend
+        PYTHON_COVERAGE_REPORT_PATHS: backend/tests/coverage.xml
 
     
     
