@@ -63,17 +63,18 @@ jobs:
     # 7️⃣ Run SonarScanner using official action
     - name: Run SonarScanner
       uses: SonarSource/sonarqube-scan-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}       # optional but sometimes needed
       with:
-        hostUrl: ${{ env.SONAR_HOST_URL }}
-        login: ${{ secrets.SONAR_TOKEN }}             # passes token to scanner
-        projectKey: ${{ env.SONAR_PROJECT_KEY }}
-        projectName: ${{ env.SONAR_PROJECT_NAME }}
-        projectVersion: ${{ github.run_number }}
-        sources: backend,frontend/src
-        pythonCoverageReportPaths: backend/coverage.xml
-
+        entryPoint: sonar-scanner
+        args: >
+          -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+          -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}"
+          -Dsonar.projectVersion=${{ github.run_number }}
+          -Dsonar.sources=backend
+          -Dsonar.python.coverage.reportPaths=backend/coverage.xml
+          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+    
+    
 
     # 8️⃣ Docker Build & Push
     - name: Login to Azure Container Registry
