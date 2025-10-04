@@ -50,16 +50,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    # 5️⃣ Install SonarScanner CLI
-    - name: Install SonarScanner CLI
+    # 5️⃣ Install and Run SonarScanner CLI
+    - name: Run SonarScanner
       run: |
         curl -Lo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.1.3023-linux.zip
         unzip sonar-scanner-cli.zip
         export PATH=$PWD/sonar-scanner-4.8.1.3023-linux/bin:$PATH
-
-    # 6️⃣ Run SonarScanner
-    - name: Run SonarScanner
-      run: |
         sonar-scanner \
           -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} \
           -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}" \
@@ -69,7 +65,7 @@ jobs:
           -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-    # 7️⃣ Docker Build & Push
+    # 6️⃣ Docker Build & Push
     - name: ACR Login
       run: docker login ${{ env.ACRNAME }}.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
 
@@ -78,13 +74,13 @@ jobs:
         docker build -t $IMAGENAME:$TAG -f Dockerfile.backend .
         docker push $IMAGENAME:$TAG
 
-    # 8️⃣ Update Deployment Manifest
+    # 7️⃣ Update Deployment Manifest
     - name: Update manifest with image details
       run: |
         sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/backend-deployment.yaml
         sed -i "s|#__#IMAGE_TAG#__#|$TAG|g" k8s/backend-deployment.yaml
 
-    # 9️⃣ Set up AKS context & deploy
+    # 8️⃣ Set up AKS context & deploy
     - name: Set up Kubernetes
       uses: azure/setup-kubectl@v1
       with:
