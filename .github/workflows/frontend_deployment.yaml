@@ -11,7 +11,7 @@ env:
   ACRNAME: acrtodoappdev01
   IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_ui
   TAG: ${{ github.run_number }}
-  SONAR_PROJECT_KEY: dob-fact
+  SONAR_PROJECT_KEY: dob-fact_frontend
   SONAR_PROJECT_NAME: dob_facts_application_frontend
   SONAR_HOST_URL: "http://135.235.249.164:9000/"
 
@@ -40,7 +40,6 @@ jobs:
     # --------------------------------------------------
     - name: Run tests and generate coverage
       run: |
-        cd frontend
         npm test -- --coverage --watchAll=false
 
     # --------------------------------------------------
