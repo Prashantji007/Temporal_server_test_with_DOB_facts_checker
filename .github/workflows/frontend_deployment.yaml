@@ -1,85 +1,133 @@
-name: Frontend Deployment
+name: Frontend Deployment with SonarQube
 
-on: workflow_dispatch
-    
-permissions:              
-  id-token: write          # required for OIDC federation
-  contents: read   
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 env:
   ACRNAME: acrtodoappdev01
   IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_ui
-  TAG: ${{ github.run_number }} # you can also use ${{ github.sha }} for commit hash or 'latest'
-  
+  TAG: ${{ github.run_number }}
+  SONAR_PROJECT_KEY: dob-fact
+  SONAR_PROJECT_NAME: dob facts application
+  SONAR_HOST_URL: "http://135.235.249.164:9000/"
+
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout repository
-      uses:  actions/checkout@v4
+      uses: actions/checkout@v4
 
-        # Login to ACR
+    # --------------------------------------------------
+    # 1️⃣ Set up Node.js
+    # --------------------------------------------------
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    # --------------------------------------------------
+    # 2️⃣ Run unit tests and generate coverage
+    # --------------------------------------------------
+    - name: Run tests and generate coverage
+      run: |
+        cd frontend
+        npm test -- --coverage --watchAll=false
+
+    # --------------------------------------------------
+    # 3️⃣ Set up JDK for SonarQube Scanner
+    # --------------------------------------------------
+    - name: Set up JDK (required by SonarQube)
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # --------------------------------------------------
+    # 4️⃣ Run SonarQube Scan (with coverage)
+    # --------------------------------------------------
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v1
+      with:
+        args: >
+          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+    # Optional - break build if quality gate fails
+    - name: SonarQube Quality Gate
+      uses: SonarSource/sonarqube-quality-gate-action@v1
+      with:
+        sonar_host_url: ${{ env.SONAR_HOST_URL }}
+        sonar_token: ${{ secrets.SONAR_TOKEN }}
+
+    # --------------------------------------------------
+    # 5️⃣ Build & Push Docker Image
+    # --------------------------------------------------
     - name: ACR Login
       run: docker login acrtodoappdev01.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
 
-    # Build and Push Docker Image
-    - name: Build and Push
+    - name: Build and Push Docker Image
       run: |
-        echo "Building image $IMAGENAME:$TAG"
-        docker build -t $IMAGENAME:$TAG -f Dockerfile.frontend .
+        IMAGE_TAG=${{ github.run_number }}
+        echo "Building image $IMAGENAME:$IMAGE_TAG"
+        docker build -t $IMAGENAME:$IMAGE_TAG -f Dockerfile.frontend .
+        echo "Pushing image $IMAGENAME:$IMAGE_TAG"
+        docker push $IMAGENAME:$IMAGE_TAG
+        echo "Pushed image $IMAGENAME:$IMAGE_TAG to $ACRNAME"
 
-        echo "Pushing image $IMAGENAME:$TAG"
-        docker push $IMAGENAME:$TAG
-
-          echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
-
-
+    # --------------------------------------------------
+    # 6️⃣ Update Deployment Manifest
+    # --------------------------------------------------
     - name: Update manifest with image details
       run: |
-        IMAGE_NAME=acrtodoappdev01.azurecr.io/dob_facts
         IMAGE_TAG=${{ github.run_number }}
-
-        # Replace placeholders in manifest
         sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/frontend-deployment.yaml
         sed -i "s|#__#IMAGE_TAG#__#|$IMAGE_TAG|g" k8s/frontend-deployment.yaml
-    
-        echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
+        echo "Updated manifest with image: $IMAGENAME:$IMAGE_TAG"
 
-            
-
+    # --------------------------------------------------
+    # 7️⃣ Set up AKS Context & Deploy
+    # --------------------------------------------------
     - name: Set up Kubernetes
       uses: azure/setup-kubectl@v1
       with:
         version: 'latest'
-
 
     - name: Azure Login
       uses: Azure/login@v2.3.0
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Set AKS context
       uses: azure/aks-set-context@v3
       with:
         resource-group: rg-todoapp-dev
         cluster-name: aks-todoapp-dev01
-        
 
     - name: Deploy Frontend to Kubernetes
       run: |
-       kubectl apply -f k8s/namespace.yaml
-       kubectl apply -f k8s/configmap.yaml
-       kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f k8s/namespace.yaml
+        kubectl apply -f k8s/configmap.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
 
-    - name: Create the ACR secret in namespace
+    - name: Create ACR Secret in Namespace
       run: |
         kubectl create secret docker-registry acr-cred \
-        --docker-server=acrtodoappdev01.azurecr.io \
-        --docker-username=${{ secrets.ACR_USERNAME }} \
-        --docker-password=${{ secrets.ACR_PASSWORD }} \
-        --docker-email=unused@example.com \
-        -n dob-facts-app \
-        --dry-run=client -o yaml | kubectl apply -f -
-
+          --docker-server=acrtodoappdev01.azurecr.io \
+          --docker-username=${{ secrets.ACR_USERNAME }} \
+          --docker-password=${{ secrets.ACR_PASSWORD }} \
+          --docker-email=unused@example.com \
+          -n dob-facts-app \
+          --dry-run=client -o yaml | kubectl apply -f -
