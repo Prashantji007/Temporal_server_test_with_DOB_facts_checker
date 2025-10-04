@@ -65,16 +65,14 @@ jobs:
     - name: Run SonarScanner
       uses: SonarSource/sonarqube-scan-action@v2
       with:
-        entryPoint: sonar-scanner
-        args: >
-          "-Dproject.settings=sonar-project-backend.properties
-          -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
-          -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}"
-          -Dsonar.projectVersion=${{ github.run_number }}
-          -Dsonar.sources=backend
-          -Dsonar.python.coverage.reportPaths= backend/tests/coverage.xml
-          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}"
+        projectKey: ${{ env.SONAR_PROJECT_KEY }}
+        projectName: ${{ env.SONAR_PROJECT_NAME }}
+        projectVersion: ${{ github.run_number }}
+        sources: backend
+        pythonCoverageReportPaths: backend/tests/coverage.xml
+        hostUrl: ${{ env.SONAR_HOST_URL }}
+        login: ${{ secrets.SONAR_TOKEN }}
+
     
     
 
