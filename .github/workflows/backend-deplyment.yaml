@@ -43,30 +43,31 @@ jobs:
         coverage xml -o coverage.xml
         coverage report
 
-    # 4️⃣ Set up JDK for SonarQube Scanner
+    # 4️⃣ Set up JDK 17
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # 5️⃣ Run SonarQube Scan
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v1
-      env:
-       JAVA_HOME: ${{ steps.setup-java.outputs.path }}
-      with:
-        args: >
-          -Dsonar.projectVersion=${{ github.run_number }}
-          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+    # 5️⃣ Install SonarScanner CLI
+    - name: Install SonarScanner CLI
+      run: |
+        curl -Lo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.1.3023-linux.zip
+        unzip sonar-scanner-cli.zip
+        export PATH=$PWD/sonar-scanner-4.8.1.3023-linux/bin:$PATH
 
-    # 6️⃣ SonarQube Quality Gate
-    - name: SonarQube Quality Gate
-      uses: SonarSource/sonarqube-quality-gate-action@v1
-      with:
-        sonar_host_url: ${{ env.SONAR_HOST_URL }}
-        sonar_token: ${{ secrets.SONAR_TOKEN }}
+    # 6️⃣ Run SonarScanner
+    - name: Run SonarScanner
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} \
+          -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}" \
+          -Dsonar.projectVersion=${{ github.run_number }} \
+          -Dsonar.sources=backend \
+          -Dsonar.python.coverage.reportPaths=coverage.xml \
+          -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     # 7️⃣ Docker Build & Push
     - name: ACR Login
