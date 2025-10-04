@@ -1,61 +1,120 @@
-name: Backend Deployment
+name: Backend Deployment with SonarQube
 
-on: workflow_dispatch
-    
+on:
+  workflow_dispatch
+
 permissions:              
-  id-token: write          # required for OIDC federation
+  id-token: write
   contents: read   
 
 env:
   ACRNAME: acrtodoappdev01
   IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_be
-  TAG: ${{ github.run_number }} # you can also use ${{ github.sha }} for commit hash or 'latest'
-  
-jobs:
-  deploy-backendend:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses:  actions/checkout@v4
+  TAG: ${{ github.run_number }}
+  SONAR_PROJECT_KEY: dob-fact-be
+  SONAR_PROJECT_NAME: DOB Facts Application
+  SONAR_HOST_URL: "http://135.235.249.164:9000/"
 
-        # Login to ACR
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+    # -------------------------------
+    # 1️⃣ Checkout repo
+    # -------------------------------
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # -------------------------------
+    # 2️⃣ Set up Python and dependencies
+    # -------------------------------
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage pytest
+
+    # -------------------------------
+    # 3️⃣ Run backend tests and generate coverage
+    # -------------------------------
+    - name: Run backend tests
+      run: |
+        cd backend
+        coverage run -m pytest test_server.py
+        coverage xml -o coverage.xml
+
+    # -------------------------------
+    # 4️⃣ Set up JDK for SonarQube Scanner
+    # -------------------------------
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # -------------------------------
+    # 5️⃣ Run SonarQube Scan
+    # -------------------------------
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v1
+      with:
+        args: >
+          -Dsonar.projectVersion=${{ github.run_number }}
+          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          # Scanner will automatically read sonar-project.properties in repo root
+
+    # Optional: fail workflow if quality gate fails
+    - name: SonarQube Quality Gate
+      uses: SonarSource/sonarqube-quality-gate-action@v1
+      with:
+        sonar_host_url: ${{ env.SONAR_HOST_URL }}
+        sonar_token: ${{ secrets.SONAR_TOKEN }}
+
+    # -------------------------------
+    # 6️⃣ Docker Build & Push
+    # -------------------------------
     - name: ACR Login
       run: docker login acrtodoappdev01.azurecr.io -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
 
-    # Build and Push Docker Image
-    - name: Build and Push
+    - name: Build and Push Docker Image
       run: |
         echo "Building image $IMAGENAME:$TAG"
         docker build -t $IMAGENAME:$TAG -f Dockerfile.backend .
-
         echo "Pushing image $IMAGENAME:$TAG"
         docker push $IMAGENAME:$TAG
+        echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
 
-          echo "Pushed image $IMAGENAME:$TAG to $ACRNAME"
-
-
+    # -------------------------------
+    # 7️⃣ Update Deployment Manifest
+    # -------------------------------
     - name: Update manifest with image details
       run: |
-        # Replace placeholders in manifest
         sed -i "s|#__#IMAGE_NAME#__#|$IMAGENAME|g" k8s/backend-deployment.yaml
         sed -i "s|#__#IMAGE_TAG#__#|$TAG|g" k8s/backend-deployment.yaml
+        echo "Updated manifest with image: $IMAGENAME:$TAG"
 
-        echo "Updated manifest with image: $IMAGE_NAME:$IMAGE_TAG"
-
-    
-
+    # -------------------------------
+    # 8️⃣ Set up AKS context & deploy
+    # -------------------------------
     - name: Set up Kubernetes
       uses: azure/setup-kubectl@v1
       with:
         version: 'latest'
-
 
     - name: Azure Login
       uses: Azure/login@v2.3.0
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Set AKS context
       uses: azure/aks-set-context@v3
@@ -63,6 +122,6 @@ jobs:
         resource-group: rg-todoapp-dev
         cluster-name: aks-todoapp-dev01
 
-    - name: Deploy Frontend to Kubernetes
+    - name: Deploy Backend to Kubernetes
       run: |
-       kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/backend-deployment.yaml
