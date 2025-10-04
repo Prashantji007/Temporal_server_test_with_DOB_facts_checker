@@ -12,7 +12,7 @@ env:
   IMAGENAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_ui
   TAG: ${{ github.run_number }}
   SONAR_PROJECT_KEY: dob-fact
-  SONAR_PROJECT_NAME: dob facts application
+  SONAR_PROJECT_NAME: dob_facts_application_frontend
   SONAR_HOST_URL: "http://135.235.249.164:9000/"
 
 jobs:
@@ -60,6 +60,7 @@ jobs:
       uses: SonarSource/sonarqube-scan-action@v1
       with:
         args: >
+          -Dproject.settings=sonar-project-frontend.properties
           -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
