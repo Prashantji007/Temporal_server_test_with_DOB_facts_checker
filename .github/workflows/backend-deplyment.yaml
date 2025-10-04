@@ -49,7 +49,7 @@ jobs:
     # 5️⃣ Run backend tests with coverage
     - name: Run backend tests
       run: |
-        coverage run -m pytest backend/test_server.py
+        coverage run -m pytest backend/tests/test_server.py
         coverage xml -o coverage.xml
         coverage report
 
