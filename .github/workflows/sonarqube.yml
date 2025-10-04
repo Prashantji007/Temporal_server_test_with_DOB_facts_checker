@@ -44,7 +44,7 @@ jobs:
           PYTHONPATH=. pytest test_server.py --cov=. --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junitxml=test-reports/pytest-report.xml -v
           echo "Backend Coverage Report:"
           coverage report
-          echo "Coverage XML Location:"
+          echo "Coverage XML Location:" 
           ls -la coverage.xml
           echo "Test Report Location:"
           ls -la test-reports/
