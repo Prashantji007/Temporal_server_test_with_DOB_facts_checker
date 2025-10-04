@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: acrtodoappdev01.azurecr.io/dob_facts/dob_facts_be
   TAG: ${{ github.run_number }}
   SONAR_PROJECT_KEY: dob-fact-be
-  SONAR_PROJECT_NAME: DOB Facts Application
+  SONAR_PROJECT_NAME: DOB_Facts_Application
   SONAR_HOST_URL: "http://135.235.249.164:9000/"
 
 jobs:
