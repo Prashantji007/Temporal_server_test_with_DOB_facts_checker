@@ -47,8 +47,9 @@ jobs:
         pip install coverage pytest
 
     # 5️⃣ Run backend tests with coverage
-    - name: Run backend tests
+    - name: Run backend tests with coverage
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
         coverage run -m pytest backend/tests/test_server.py
         coverage xml -o backend/tests/coverage.xml
         coverage report

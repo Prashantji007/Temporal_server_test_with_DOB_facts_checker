@@ -6,6 +6,8 @@ import io
 from unittest.mock import MagicMock, patch
 import io
 import http.server
+from backend import server
+
 
 class TestHealthHandler(unittest.TestCase):
     def test_health_check(self):
