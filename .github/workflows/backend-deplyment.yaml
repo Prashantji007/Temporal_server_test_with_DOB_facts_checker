@@ -49,7 +49,7 @@ jobs:
     # 5️⃣ Run backend tests with coverage
     - name: Run backend tests
       run: |
-        coverage run -m pytest backend/tests/test_server.py
+        coverage run -m pytest backend/tests
         coverage xml -o backend/tests/coverage.xml
         coverage report
 
@@ -71,7 +71,7 @@ jobs:
           -Dsonar.projectName="${{ env.SONAR_PROJECT_NAME }}"
           -Dsonar.projectVersion=${{ github.run_number }}
           -Dsonar.sources=backend
-          -Dsonar.python.coverage.reportPaths=backend/coverage.xml
+          -Dsonar.python.coverage.reportPaths= backend/tests/coverage.xml
           -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
     
